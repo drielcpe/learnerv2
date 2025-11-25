@@ -291,7 +291,7 @@ export default function StudentDashboard() {
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full justify-start gap-2">
-                  <Link href="/payments/students/">
+                  <Link href="/student/payments">
                     <CreditCard className="h-4 w-4" />
                     Payment History
                   </Link>

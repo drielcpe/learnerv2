@@ -198,13 +198,13 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Button asChild className="w-full justify-start gap-2">
-              <Link href="/admin/attendance">
+              <Link href="/admin/attendance-management">
                 <UserCheck className="h-4 w-4" />
-                Attendance Console
+                Attendance Management
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full justify-start gap-2">
-              <Link href="/student-management">
+              <Link href="/admin/student-management">
                 <Users className="h-4 w-4" />
                 Student Management
               </Link>
