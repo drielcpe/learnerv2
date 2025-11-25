@@ -3,16 +3,23 @@
 import { useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Scan, Upload, X, User, Loader2 } from "lucide-react"
+import { Upload, User, Loader2 } from "lucide-react"
+
+// Define the scan data interface
+interface ScanData {
+  student_id: string
+  student_name: string
+  grade: string
+  section: string
+}
 
 interface QRScannerProps {
-  onScan: (data: any) => void
+  onScan: (data: ScanData) => void
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
 export function QRScanner({ onScan, open, onOpenChange }: QRScannerProps) {
-  const [scanning, setScanning] = useState(false)
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -59,7 +66,12 @@ export function QRScanner({ onScan, open, onOpenChange }: QRScannerProps) {
   const handleManualInput = () => {
     const studentId = prompt('Enter Student ID manually:')
     if (studentId) {
-      onScan({ student_id: studentId, student_name: 'Manual Entry', grade: '', section: '' })
+      onScan({ 
+        student_id: studentId, 
+        student_name: 'Manual Entry', 
+        grade: '', 
+        section: '' 
+      })
       onOpenChange(false)
     }
   }

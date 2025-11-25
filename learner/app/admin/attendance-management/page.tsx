@@ -3,7 +3,7 @@
 
 import AdminAttendanceClient from "./AdminAttendanceClient"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, UserCog, Calendar } from "lucide-react"
+import { ArrowLeft, UserCog} from "lucide-react"
 
 export default function AdminAttendancePage() {
   return (

@@ -8,20 +8,33 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-
 import { Badge } from "@/components/ui/badge"
 
+// Define the interface for the form data
+interface CreateStudentFormData {
+  student_id: string
+  student_name: string
+  student_type: 'student' | 'secretary'
+  grade: string
+  section: string
+  adviser: string
+  contact_number: string
+  email: string
+  address: string
+  birth_date: string
+}
+
 interface CreateStudentDialogProps {
-  onCreateStudent: (data: any) => Promise<void>
+  onCreateStudent: (data: CreateStudentFormData) => Promise<void>
   isCreating: boolean
 }
 
 export function CreateStudentDialog({ onCreateStudent, isCreating }: CreateStudentDialogProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateStudentFormData>({
     student_id: '',
     student_name: '',
-    student_type: 'student' as 'student' | 'secretary', // Add student_type with default
+    student_type: 'student',
     grade: '7',
     section: '',
     adviser: '',
@@ -31,42 +44,43 @@ export function CreateStudentDialog({ onCreateStudent, isCreating }: CreateStude
     birth_date: '',
   })
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  
-  // Validate required fields
-  if (!formData.student_id || !formData.student_name || !formData.section) {
-  
-    return
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Validate required fields
+    if (!formData.student_id || !formData.student_name || !formData.section) {
+      alert('Please fill in all required fields (Student ID, Name, and Section)')
+      return
+    }
+
+    // DEBUG: Check what's in formData
+    console.log('🎯 Form data being submitted:', formData)
+    console.log('📝 Student type value:', formData.student_type)
+
+    try {
+      await onCreateStudent(formData)
+      setIsDialogOpen(false)
+      // Reset form
+      setFormData({
+        student_id: '',
+        student_name: '',
+        student_type: 'student',
+        grade: '7',
+        section: '',
+        adviser: '',
+        contact_number: '',
+        email: '',
+        address: '',
+        birth_date: '',
+      })
+      alert('✅ Student created successfully!')
+    } catch (error) {
+      console.error('Error in CreateStudentDialog:', error)
+      alert('❌ Failed to create student. Please try again.')
+    }
   }
 
-  // DEBUG: Check what's in formData
-  console.log('🎯 Form data being submitted:', formData)
-  console.log('📝 Student type value:', formData.student_type)
-
-  try {
-    await onCreateStudent(formData)
-    setIsDialogOpen(false)
-    // Reset form
-    setFormData({
-      student_id: '',
-      student_name: '',
-      student_type: 'student',
-      grade: '7',
-      section: '',
-      adviser: '',
-      contact_number: '',
-      email: '',
-      address: '',
-      birth_date: '',
-    })
-  
-  } catch (error) {
-    console.error('Error in CreateStudentDialog:', error)
-  }
-}
-
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: keyof CreateStudentFormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -116,7 +130,7 @@ export function CreateStudentDialog({ onCreateStudent, isCreating }: CreateStude
                 />
               </div>
 
-              {/* Student Type Field - ADDED */}
+              {/* Student Type Field */}
               <div>
                 <Label htmlFor="create_student_type" className="text-sm font-medium">Student Type *</Label>
                 <Select 

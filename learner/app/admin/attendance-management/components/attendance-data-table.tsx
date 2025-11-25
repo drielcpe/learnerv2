@@ -9,7 +9,6 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  TableMeta,
 } from "@tanstack/react-table"
 
 import {
@@ -21,11 +20,22 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { DataTablePagination } from "../components/data-table-pagination"
-import { DataTableToolbar } from "../components/data-table-toolbar"
+import { DataTablePagination } from "./data-table-pagination"
+import { DataTableToolbar } from "./data-table-toolbar"
 import type { Attendance, DayKey, PeriodKey, AttendanceStatus } from "../data/schema"
 
-
+/* ------------------ */
+/* 1. Extend TableMeta */
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData = unknown> {
+    updateAttendance?: (
+      studentId: number,
+      day: DayKey,
+      period: PeriodKey,
+      status: AttendanceStatus
+    ) => Promise<void>
+  }
+}
 /* ------------------ */
 /* 2. Component Props */
 /* ------------------ */

@@ -17,8 +17,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus, Edit, Save, X, QrCode, Wallet, CreditCard, Banknote, Trash2, Search, Upload, Download, ArrowLeft, UserCog } from "lucide-react"
-const API_BASE_URL = 'https://dev.datsgedli.com/api';
+import { Plus, Edit, Save, X, QrCode, Wallet, CreditCard, Banknote, Trash2, Search, Upload, ArrowLeft, UserCog } from "lucide-react"
+
 interface PaymentMethod {
   id: number;
   method_code: string;
@@ -26,7 +26,7 @@ interface PaymentMethod {
   description: string;
   is_active: boolean;
   has_qr: boolean;
-  qr_code_data?: any;
+  qr_code_data?: string | null; // Change from any to string | null
   qr_code_filename?: string;
   qr_code_mimetype?: string;
   account_number?: string;
@@ -66,7 +66,7 @@ export function PaymentMethodsConfig() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+
   const [searchTerm, setSearchTerm] = useState('')
   const [useDummyData, setUseDummyData] = useState(false)
 
@@ -90,7 +90,6 @@ export function PaymentMethodsConfig() {
   const fetchPaymentMethods = async () => {
     try {
       setLoading(true)
-      setError(null)
       setUseDummyData(false)
       
       const response = await fetch('/api/payment-methods')
@@ -109,7 +108,6 @@ export function PaymentMethodsConfig() {
       
     } catch (error) {
       console.log('API not available, using dummy data:', error)
-      setError('Failed to load payment methods from API. Using demo data.')
       setUseDummyData(true)
     } finally {
       setLoading(false)
@@ -393,134 +391,7 @@ const deleteQrCode = async (methodId: number) => {
     alert(`Failed to remove QR code: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
-function QrCodeDisplay({ methodId, methodName }: { methodId: number, methodName: string }) {
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadQrCode();
-  }, [methodId]);
-
-  const loadQrCode = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log(`🔄 Loading QR code for method ${methodId}...`);
-      
-      const response = await fetch(`/api/payment-methods/${methodId}/qr`);
-      const result = await response.json();
-      
-      console.log(`📊 QR data response for method ${methodId}:`, result);
-      
-      if (result.success && result.data.dataUrl) {
-        setQrDataUrl(result.data.dataUrl);
-        console.log(`✅ QR code loaded successfully for method ${methodId}`);
-      } else {
-        throw new Error(result.error || 'No QR data found');
-      }
-    } catch (error) {
-      console.error(`❌ Failed to load QR code for method ${methodId}:`, error);
-      setError(error instanceof Error ? error.message : 'Failed to load QR code');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="w-32 h-32 flex items-center justify-center border rounded bg-muted/20">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-1"></div>
-          <p className="text-xs text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-32 h-32 flex flex-col items-center justify-center border rounded bg-destructive/10">
-        <QrCode className="h-6 w-6 text-destructive mb-1" />
-        <p className="text-xs text-destructive text-center">Failed to load</p>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={loadQrCode}
-          className="mt-1 h-6 text-xs"
-        >
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
-  if (qrDataUrl) {
-    return (
-      <img 
-        src={qrDataUrl}
-        alt={`${methodName} QR Code`}
-        className="w-32 h-32 object-contain border rounded"
-        onError={() => {
-          console.error(`❌ Image failed to render for method ${methodId}`);
-          setError('Image rendering failed');
-        }}
-      />
-    );
-  }
-
-  return (
-    <div className="w-32 h-32 flex items-center justify-center border rounded bg-muted/20">
-      <div className="text-center">
-        <QrCode className="h-6 w-6 text-muted-foreground mx-auto mb-1" />
-        <p className="text-xs text-muted-foreground">No QR code</p>
-      </div>
-    </div>
-  );
-}
-const toggleMethodStatus = async (methodId: number, isActive: boolean) => {
-  try {
-    const method = methods.find(m => m.id === methodId)
-    if (!method) return
-
-    if (useDummyData) {
-      setMethods(prev => prev.map(m =>
-        m.id === methodId
-          ? { ...m, is_active: !isActive, updated_at: new Date().toISOString() }
-          : m
-      ))
-    } else {
-      // Only send the is_active field for status toggle
-      const response = await fetch(`/api/payment-methods?id=${methodId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          is_active: !isActive 
-        })
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const result = await response.json()
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to update payment method status')
-      }
-      
-      await fetchPaymentMethods()
-    }
-    
-    alert(`Payment method ${!isActive ? 'activated' : 'deactivated'} successfully!`)
-  } catch (error) {
-    console.error('Error updating method status:', error)
-    alert(`Failed to update payment method status: ${error instanceof Error ? error.message : 'Unknown error'}`)
-  }
-}
 
   const getMethodIcon = (methodCode: string) => {
     switch (methodCode) {
@@ -702,7 +573,7 @@ const toggleMethodStatus = async (methodId: number, isActive: boolean) => {
 
       {filteredMethods.length === 0 && searchTerm && (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">No payment methods found matching "{searchTerm}"</p>
+       <p className="text-muted-foreground">No payment methods found matching &quot;{searchTerm}&quot;</p>
         </div>
       )}
 
@@ -746,9 +617,9 @@ const toggleMethodStatus = async (methodId: number, isActive: boolean) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Payment Method</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{methodToDelete?.method_name}"? This action cannot be undone.
-            </DialogDescription>
+     <DialogDescription>
+  Are you sure you want to delete &quot;{methodToDelete?.method_name}&quot;? This action cannot be undone.
+</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button 

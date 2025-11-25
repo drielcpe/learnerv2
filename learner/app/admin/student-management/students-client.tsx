@@ -11,6 +11,41 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 
+// Interface for API response data
+interface ApiStudent {
+  id?: number
+  student_id?: string
+  student_name?: string
+  student_type?: string
+  grade?: string
+  section?: string
+  adviser?: string | null
+  contact_number?: string
+  email?: string
+  address?: string
+  birth_date?: string | null
+  qr_code?: string | null
+  status?: string
+  created_at?: string
+  updated_at?: string
+  enrollment_date?: string | null
+}
+
+// Interface for create student form data
+interface CreateStudentFormData {
+  student_id: string
+  student_name: string
+  student_type: 'student' | 'secretary'
+  grade: string
+  section: string
+  adviser: string
+  contact_number: string
+  email: string
+  address: string
+  birth_date: string
+  status: 'ACTIVE' | 'INACTIVE'
+}
+
 export default function StudentsClient() {
   const [students, setStudents] = useState<Student[]>([])
   const [isUpdating, setIsUpdating] = useState(false)
@@ -53,7 +88,7 @@ export default function StudentsClient() {
       }
 
       // Transform data
-      const validatedData = result.data.map((item: any) => {
+      const validatedData = result.data.map((item: ApiStudent) => {
         let studentType: 'student' | 'secretary' = 'student'
         
         if (item.student_type === 'secretary') {
@@ -94,7 +129,7 @@ export default function StudentsClient() {
   }
 
   // Handle creating a new student
-  const handleCreateStudent = async (studentData: Omit<Student, 'id' | 'created_at' | 'updated_at' | 'enrollment_date' | 'qr_code'>) => {
+  const handleCreateStudent = async (studentData: CreateStudentFormData) => {
     setIsUpdating(true)
     try {
       console.log('📤 Creating student with data:', studentData)
@@ -317,14 +352,14 @@ function CreateStudentButton({
   onCreateStudent, 
   isCreating 
 }: { 
-  onCreateStudent: (data: any) => Promise<void>
+  onCreateStudent: (data: CreateStudentFormData) => Promise<void>
   isCreating: boolean
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateStudentFormData>({
     student_id: '',
     student_name: '',
-    student_type: 'student' as 'student' | 'secretary',
+    student_type: 'student',
     grade: '7',
     section: '',
     adviser: '',
@@ -332,6 +367,7 @@ function CreateStudentButton({
     email: '',
     address: '',
     birth_date: '',
+    status: 'ACTIVE'
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -361,6 +397,7 @@ function CreateStudentButton({
         email: '',
         address: '',
         birth_date: '',
+        status: 'ACTIVE'
       })
     } catch (error) {
       // Error is handled in the parent component
