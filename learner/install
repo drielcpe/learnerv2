@@ -1,0 +1,20 @@
+npm install @radix-ui/react-collapsible
+npm install @radix-ui/react-label      
+npm install @radix-ui/react-tabs 
+npm install jsqr
+npm install mysql2
+npm install @radix-ui/react-alert-dialog"
+npm install react-day-picker
+npm install @radix-ui/react-checkbox
+npm install cmdk
+npm install @radix-ui/react-dropdown-menu
+npm install @radix-ui/react-popover
+npm install @radix-ui/react-progress
+npm install @radix-ui/react-select
+npm install @radix-ui/react-separator
+npm install @radix-ui/react-switch
+npm install @radix-ui/react-tooltip
+
+npm install @tanstack/react-table
+npm install zod
+npm install qrcode
